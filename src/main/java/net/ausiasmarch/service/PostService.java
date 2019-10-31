@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,9 +26,9 @@ import net.ausiasmarch.setting.ConnectionSettings;
 public class PostService implements ServiceInterface {
 
     HttpServletRequest oRequest = null;
-    String[] frasesInicio = {"El fin de la estructura ", "La agrupacion logica ", "Una visión de una idea que "};
-    String[] frasesMitad = {"dirige los objetivos ", "garantiza el deseo ", " sin la capacidad de ejecución"};
-    String[] frasesFinal = {"de la reestructuracion agraria.", " en el uso de la misma.", " es únicamente una alucinación."};
+    String[] frasesInicio = {"El fin de la estructura ", "La agrupacion logica ", "El objetivo conjunto ", "Una dinámica apropiada "};
+    String[] frasesMitad = {"dirige los objetivos ", "garantiza el deseo ", "mejora la capacidad ", "recupera el concepto "};
+    String[] frasesFinal = {"de la reestructuracion requerida. ", "en la aplicación. ", "por sus innumerables beneficios. ", "contra la inficiencia. "};
 
     public PostService(HttpServletRequest oRequest) {
         this.oRequest = oRequest;
@@ -57,8 +58,12 @@ public class PostService implements ServiceInterface {
         Connection oConnection = oConnectionImplementation.newConnection();
         int iRpp = Integer.parseInt(oRequest.getParameter("rpp"));
         int iPage = Integer.parseInt(oRequest.getParameter("page"));
+        List<String> orden = null;
+        if (oRequest.getParameter("order")!=null) {
+        	orden = Arrays.asList(oRequest.getParameter("order").split("\\s*,\\s*"));
+        }
         PostDao oPostDao = new PostDao(oConnection);
-        ArrayList alPostBean = oPostDao.getPage(iPage, iRpp);
+        ArrayList alPostBean = oPostDao.getPage(iPage, iRpp, orden);
         Gson oGson = GsonFactory.getGson();
         String strJson = oGson.toJson(alPostBean);
         if (oConnection != null) {
