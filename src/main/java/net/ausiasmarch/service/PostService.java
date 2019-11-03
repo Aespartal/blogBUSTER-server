@@ -52,7 +52,7 @@ public class PostService implements ServiceInterface {
         }
         return "{\"status\":200,\"message\":" + strJson + "}";
     }
-
+ 
     @Override
     public String getPage() throws SQLException {
         ConnectionInterface oConnectionImplementation = ConnectionFactory.getConnection(ConnectionSettings.connectionPool);
