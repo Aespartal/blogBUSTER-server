@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import net.ausiasmarch.bean.BeanInterface;
 
 import net.ausiasmarch.bean.PostBean;
@@ -59,8 +60,8 @@ public class PostService implements ServiceInterface {
         int iRpp = Integer.parseInt(oRequest.getParameter("rpp"));
         int iPage = Integer.parseInt(oRequest.getParameter("page"));
         List<String> orden = null;
-        if (oRequest.getParameter("order")!=null) {
-        	orden = Arrays.asList(oRequest.getParameter("order").split("\\s*,\\s*"));
+        if (oRequest.getParameter("order") != null) {
+            orden = Arrays.asList(oRequest.getParameter("order").split("\\s*,\\s*"));
         }
         PostDao oPostDao = new PostDao(oConnection);
         ArrayList alPostBean = oPostDao.getPage(iPage, iRpp, orden);
@@ -99,21 +100,26 @@ public class PostService implements ServiceInterface {
         ConnectionInterface oConnectionImplementation = ConnectionFactory.getConnection(ConnectionSettings.connectionPool);
         Connection oConnection = oConnectionImplementation.newConnection();
         Gson oGson = GsonFactory.getGson();
-        ResponseBean oResponseBean;
+        ResponseBean oResponseBean = null;
         PostBean oPostBean = new PostBean();
         String data = oRequest.getParameter("data");
         oPostBean = oGson.fromJson(data, PostBean.class);
         PostDao oPostDao = new PostDao(oConnection);
-        if (oPostDao.update(oPostBean) == 0) {
-            oResponseBean = new ResponseBean(500, "KO");
+        HttpSession oSession = oRequest.getSession();
+        if (oSession.getAttribute("usuario") != null) {
+            if (oPostDao.update(oPostBean) == 0) {
+                oResponseBean = new ResponseBean(500, "KO");
+            } else {
+                oResponseBean = new ResponseBean(200, "OK");
+            }
+            if (oConnection != null) {
+                oConnection.close();
+            }
+            if (oConnectionImplementation != null) {
+                oConnectionImplementation.disposeConnection();
+            }
         } else {
-            oResponseBean = new ResponseBean(200, "OK");
-        }
-        if (oConnection != null) {
-            oConnection.close();
-        }
-        if (oConnectionImplementation != null) {
-            oConnectionImplementation.disposeConnection();
+            oResponseBean = new ResponseBean(500, "KO");
         }
         return oGson.toJson(oResponseBean);
     }
@@ -151,16 +157,21 @@ public class PostService implements ServiceInterface {
         PostBean oPostBean = oGson.fromJson(oRequest.getParameter("data"), PostBean.class);
         ResponseBean oResponseBean;
         PostDao oPostDao = new PostDao(oConnection);
-        if (oPostDao.insert(oPostBean) == 0) {
-            oResponseBean = new ResponseBean(500, "KO");
+        HttpSession oSession = oRequest.getSession();
+        if (oSession.getAttribute("usuario") != null) {
+            if (oPostDao.insert(oPostBean) == 0) {
+                oResponseBean = new ResponseBean(500, "KO");
+            } else {
+                oResponseBean = new ResponseBean(200, "OK");
+            }
+            if (oConnection != null) {
+                oConnection.close();
+            }
+            if (oConnectionImplementation != null) {
+                oConnectionImplementation.disposeConnection();
+            }
         } else {
-            oResponseBean = new ResponseBean(200, "OK");
-        };
-        if (oConnection != null) {
-            oConnection.close();
-        }
-        if (oConnectionImplementation != null) {
-            oConnectionImplementation.disposeConnection();
+            oResponseBean = new ResponseBean(500, "KO");
         }
         return oGson.toJson(oResponseBean);
 
@@ -174,16 +185,21 @@ public class PostService implements ServiceInterface {
         Gson oGson = GsonFactory.getGson();
         int id = Integer.parseInt(oRequest.getParameter("id"));
         ResponseBean oResponseBean;
-        if (oPostDao.remove(id) == 0) {
-            oResponseBean = new ResponseBean(500, "KO");
+        HttpSession oSession = oRequest.getSession();
+        if (oSession.getAttribute("usuario") != null) {
+            if (oPostDao.remove(id) == 0) {
+                oResponseBean = new ResponseBean(500, "KO");
+            } else {
+                oResponseBean = new ResponseBean(200, "OK");
+            }
+            if (oConnection != null) {
+                oConnection.close();
+            }
+            if (oConnectionImplementation != null) {
+                oConnectionImplementation.disposeConnection();
+            }
         } else {
-            oResponseBean = new ResponseBean(200, "OK");
-        }
-        if (oConnection != null) {
-            oConnection.close();
-        }
-        if (oConnectionImplementation != null) {
-            oConnectionImplementation.disposeConnection();
+            oResponseBean = new ResponseBean(500, "KO");
         }
         return oGson.toJson(oResponseBean);
     }
