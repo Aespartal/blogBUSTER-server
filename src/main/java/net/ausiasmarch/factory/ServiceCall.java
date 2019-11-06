@@ -1,6 +1,5 @@
 package net.ausiasmarch.factory;
 
-import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import net.ausiasmarch.service.PostService;
 import net.ausiasmarch.service.UsuarioService;
@@ -10,7 +9,7 @@ public class ServiceCall {
 
     HttpServletRequest oRequest;
 
-    public static String executeService(HttpServletRequest oRequest) throws SQLException {
+    public static String executeService(HttpServletRequest oRequest) throws Exception {
         String ob = oRequest.getParameter("ob");
         String op = oRequest.getParameter("op");
         String strResult = null;
@@ -51,7 +50,7 @@ public class ServiceCall {
                     break;
                 case "insert":
                     strResult = oPostService.insert();
-                    break;
+                    break;  
                 case "fill":
                     if (ConfigurationSettings.environment == ConfigurationSettings.EnvironmentConstans.Debug) {
                         strResult = oPostService.fill();

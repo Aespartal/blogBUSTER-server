@@ -58,13 +58,14 @@ public class PostDao implements DaoInterface {
     @Override
     public Integer update(BeanInterface oPostBeanParam) throws SQLException {
         PreparedStatement oPreparedStatement = null;
-        String strSQL = "UPDATE post SET titulo = ?, cuerpo = ?, etiquetas = ? WHERE id = ?";
+        String strSQL = "UPDATE post SET titulo = ?, cuerpo = ?, etiquetas = ?, fecha=? WHERE id = ?";
         int iResult;
         oPreparedStatement = oConnection.prepareStatement(strSQL, Statement.RETURN_GENERATED_KEYS);
         PostBean oPostBean = (PostBean) oPostBeanParam;
         oPreparedStatement.setString(1, oPostBean.getTitulo());
         oPreparedStatement.setString(2, oPostBean.getCuerpo());
         oPreparedStatement.setString(3, oPostBean.getEtiquetas());
+        oPreparedStatement.setDate(4,  new java.sql.Date(oPostBean.getFecha().getTime())); 
         oPreparedStatement.setInt(4, oPostBean.getId());
         iResult = oPreparedStatement.executeUpdate();
         return iResult;
@@ -73,15 +74,15 @@ public class PostDao implements DaoInterface {
     @Override
     public List<BeanInterface> getAll() throws SQLException {
         Statement stmt = oConnection.createStatement();
-        ResultSet oResultSet = stmt.executeQuery("SELECT * FROM post LIMIT 100");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM post LIMIT 100");
         List<BeanInterface> listaPostBean = new ArrayList();
-        while (oResultSet.next()) {
+        while (rs.next()) {
             PostBean oPostBean = new PostBean();
-            oPostBean.setId(oResultSet.getInt("id"));
-            oPostBean.setTitulo(oResultSet.getString("titulo"));
-            oPostBean.setCuerpo(oResultSet.getString("cuerpo"));
-            oPostBean.setEtiquetas(oResultSet.getString("etiquetas"));          
-            //oPostBean.setFecha(new Timestamp(rs.getTimestamp("fecha").getTime()));
+            oPostBean.setId(rs.getInt("id"));
+            oPostBean.setTitulo(rs.getString("titulo"));
+            oPostBean.setCuerpo(rs.getString("cuerpo"));
+            oPostBean.setEtiquetas(rs.getString("etiquetas"));          
+            oPostBean.setFecha(rs.getDate("fecha"));
             listaPostBean.add(oPostBean);        
         }
         return listaPostBean;
@@ -90,13 +91,13 @@ public class PostDao implements DaoInterface {
     @Override
     public Integer insert(BeanInterface oPostBeanParam) throws SQLException {
         PreparedStatement oPreparedStatement;
-        String strsql = "INSERT INTO post (titulo,cuerpo,etiquetas) VALUES(?,?,?)";
+        String strsql = "INSERT INTO post (titulo,cuerpo,etiquetas,fecha) VALUES(?,?,?,?)";
         oPreparedStatement = oConnection.prepareStatement(strsql);
         PostBean oPostBean = (PostBean) oPostBeanParam;
         oPreparedStatement.setString(1, oPostBean.getTitulo());
         oPreparedStatement.setString(2, oPostBean.getCuerpo());
         oPreparedStatement.setString(3, oPostBean.getEtiquetas());
-        //oPreparedStatement.setDate(4, (Date) oPostBean.getFecha());
+        oPreparedStatement.setDate(4, new java.sql.Date(oPostBean.getFecha().getTime()));
         int iResult = oPreparedStatement.executeUpdate();
         return iResult;
     }
@@ -116,7 +117,7 @@ public class PostDao implements DaoInterface {
     }
 
     @Override
-    public ArrayList<PostBean> getPage(int page, int limit, List<String> orden) throws SQLException {
+    public ArrayList<PostBean> getPage(int page, int limit, List<String> orden, String word) throws SQLException {
 
         PreparedStatement oPreparedStatement;
         ResultSet oResultSet;
@@ -129,9 +130,16 @@ public class PostDao implements DaoInterface {
         }
 
         if (orden == null) {
+            
         	oPreparedStatement = oConnection.prepareStatement("SELECT * FROM post LIMIT ? OFFSET ?");
         	oPreparedStatement.setInt(1, limit);
             oPreparedStatement.setInt(2, offset);
+            if(word != null){
+                oPreparedStatement = oConnection.prepareStatement("SELECT * FROM post WHERE CONCAT(`id`,`titulo`,`cuerpo`,`etiquetas`) LIKE CONCAT('%', ?, '%') LIMIT ? OFFSET ?");
+            oPreparedStatement.setString(1, word);    
+            oPreparedStatement.setInt(2, limit);
+            oPreparedStatement.setInt(3, offset);
+            }
         } else {
         	String sqlQuery = "SELECT * FROM post ";
         	sqlQuery += "ORDER BY ";
@@ -180,5 +188,4 @@ public class PostDao implements DaoInterface {
 
         return oPostBeanList;
     }
-
 }
