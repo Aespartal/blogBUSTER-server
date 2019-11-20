@@ -206,6 +206,9 @@ public class PostService implements ServiceInterface {
                 final GsonBuilder builder = new GsonBuilder();
                 builder.excludeFieldsWithoutExposeAnnotation();
                 PostBean oPostBean = oGson.fromJson(oRequest.getParameter("data"), PostBean.class);
+                if(oPostBean.getFecha()==null){
+                    oPostBean.setFecha(Calendar.getInstance().getTime());
+                }
                 PostDao oPostDao = new PostDao(oConnection);
                 if (oPostDao.insert(oPostBean) == 0) {
                     oResponseBean = new ResponseBean(500, "KO");

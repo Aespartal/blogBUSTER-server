@@ -66,7 +66,7 @@ public class PostDao implements DaoInterface {
         oPreparedStatement.setString(2, oPostBean.getCuerpo());
         oPreparedStatement.setString(3, oPostBean.getEtiquetas());
         oPreparedStatement.setDate(4,  new java.sql.Date(oPostBean.getFecha().getTime())); 
-        oPreparedStatement.setInt(4, oPostBean.getId());
+        oPreparedStatement.setInt(5, oPostBean.getId());
         iResult = oPreparedStatement.executeUpdate();
         return iResult;
     }
@@ -135,7 +135,7 @@ public class PostDao implements DaoInterface {
         	oPreparedStatement.setInt(1, limit);
             oPreparedStatement.setInt(2, offset);
             if(word != null){
-                oPreparedStatement = oConnection.prepareStatement("SELECT * FROM post WHERE CONCAT(`id`,`titulo`,`cuerpo`,`etiquetas`) LIKE CONCAT('%', ?, '%') LIMIT ? OFFSET ?");
+                oPreparedStatement = oConnection.prepareStatement("SELECT * FROM post WHERE CONCAT(id,titulo,cuerpo,etiquetas) LIKE CONCAT('%', ?, '%') LIMIT ? OFFSET ?");
             oPreparedStatement.setString(1, word);    
             oPreparedStatement.setInt(2, limit);
             oPreparedStatement.setInt(3, offset);
